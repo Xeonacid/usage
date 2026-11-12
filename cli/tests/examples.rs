@@ -294,3 +294,21 @@ fn test_choices_from_a_command() {
         "Invalid choice for arg service: nope, expected one of app, database",
     ));
 }
+
+#[test]
+fn test_exec_missing_interpreter_reports_error() {
+    let mut cmd = Command::new(cargo::cargo_bin!("usage"));
+    cmd.args([
+        "exec",
+        "usage-no-such-interpreter-xyz",
+        "../examples/test-exec-help.py",
+    ]);
+
+    let out = cmd.output().unwrap();
+    assert_ne!(out.status.code(), Some(0));
+    assert_ne!(out.status.code(), Some(127));
+    assert!(
+        !out.stderr.is_empty(),
+        "missing interpreter should write a diagnostic to stderr"
+    );
+}

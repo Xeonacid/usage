@@ -344,12 +344,13 @@ impl Shell {
         // an overridden shell gives no clue that the variable is what pointed here. And name the
         // variable the user actually set — the legacy `USAGE_SHELL_*` is still read, so assuming
         // the current spelling would send them to one they never touched.
-        let mut child = cmd.spawn().map_err(|err| match &overridden {
-            Some((key, _)) => {
-                usage::miette::miette!("failed to run `{program}` (from ${key}): {err}")
-            }
-            None => usage::miette::miette!("failed to run `{program}`: {err}"),
-        })?;
+        let mut child =
+            crate::subprocess::command_spawn(&mut cmd).map_err(|err| match &overridden {
+                Some((key, _)) => {
+                    usage::miette::miette!("failed to run `{program}` (from ${key}): {err}")
+                }
+                None => usage::miette::miette!("failed to run `{program}`: {err}"),
+            })?;
         let result = child.wait().into_diagnostic()?;
 
         if !result.success() {
